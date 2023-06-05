@@ -6,12 +6,9 @@ if __name__ == "__main__":
     # 2 args, input image and output image
     sample = cv2.imread(sys.argv[1])
 
-    # Canny edge detection
-    opencv_edges = cv2.Canny(sample, 300, 600)
-    edges = my_canny.canny(sample, 50, 110)
+    edges = my_canny.canny(sample, 50, 100)
 
     cv2.imwrite("./edges.png", edges)
-    cv2.imwrite("./opencv_edges.png", opencv_edges)
 
     element_x = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 3))
     element_y = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 20))
