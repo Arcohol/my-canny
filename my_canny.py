@@ -134,7 +134,7 @@ def non_max_suppresion_with_interpolation(m, d):
             elif 0 < direction <= np.pi / 4:
                 r = direction
                 x = (1 - np.tan(r)) * m[i, j + 1] + np.tan(r) * m[i + 1, j + 1]
-                y = (1 - np.tan(r)) * m[i, j - 1] + np.tan(r) * m[i - 1, j - 1] 
+                y = (1 - np.tan(r)) * m[i, j - 1] + np.tan(r) * m[i - 1, j - 1]
                 is_max = m[i, j] >= x and m[i, j] >= y
 
             # if direction belongs to (45, 90)
