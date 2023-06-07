@@ -30,18 +30,18 @@ def sobel(img, l2gradient=False):
     # Sobel operator in x direction
     sobel_x = np.array(
         [
-            [1, 0, -1],
-            [2, 0, -2],
-            [1, 0, -1],
+            [-1, 0, 1],
+            [-2, 0, 2],
+            [-1, 0, 1],
         ]
     )
 
     # Sobel operator in y direction
     sobel_y = np.array(
         [
-            [1, 2, 1],
-            [0, 0, 0],
             [-1, -2, -1],
+            [0, 0, 0],
+            [1, 2, 1],
         ]
     )
 
@@ -91,11 +91,11 @@ def non_max_suppresion(m, d):
             if direction == 0 or direction == 180:
                 is_max = m[i, j] >= m[i, j - 1] and m[i, j] >= m[i, j + 1]
             elif direction == 45:
-                is_max = m[i, j] >= m[i - 1, j + 1] and m[i, j] >= m[i + 1, j - 1]
+                is_max = m[i, j] >= m[i + 1, j + 1] and m[i, j] >= m[i - 1, j - 1]
             elif direction == 90:
                 is_max = m[i, j] >= m[i - 1, j] and m[i, j] >= m[i + 1, j]
             elif direction == 135:
-                is_max = m[i, j] >= m[i - 1, j - 1] and m[i, j] >= m[i + 1, j + 1]
+                is_max = m[i, j] >= m[i + 1, j - 1] and m[i, j] >= m[i - 1, j + 1]
 
             # Count the pixels that are being pruned
             count += is_max
@@ -133,15 +133,15 @@ def non_max_suppresion_with_interpolation(m, d):
             # if direction belongs to (0, 45]
             elif 0 < direction <= np.pi / 4:
                 r = direction
-                x = (1 - np.tan(r)) * m[i, j + 1] + np.tan(r) * m[i - 1, j + 1]
-                y = (1 - np.tan(r)) * m[i, j - 1] + np.tan(r) * m[i + 1, j - 1]
+                x = (1 - np.tan(r)) * m[i, j + 1] + np.tan(r) * m[i + 1, j + 1]
+                y = (1 - np.tan(r)) * m[i, j - 1] + np.tan(r) * m[i - 1, j - 1] 
                 is_max = m[i, j] >= x and m[i, j] >= y
 
             # if direction belongs to (45, 90)
             elif np.pi / 4 < direction < np.pi / 2:
                 r = np.pi / 2 - direction
-                x = (1 - np.tan(r)) * m[i - 1, j] + np.tan(r) * m[i - 1, j + 1]
-                y = (1 - np.tan(r)) * m[i + 1, j] + np.tan(r) * m[i + 1, j - 1]
+                x = (1 - np.tan(r)) * m[i + 1, j] + np.tan(r) * m[i + 1, j + 1]
+                y = (1 - np.tan(r)) * m[i - 1, j] + np.tan(r) * m[i - 1, j - 1]
                 is_max = m[i, j] >= x and m[i, j] >= y
 
             # if direction equals 90
@@ -151,15 +151,15 @@ def non_max_suppresion_with_interpolation(m, d):
             # if direction belongs to (90, 135)
             elif np.pi / 2 < direction < 3 * np.pi / 4:
                 r = direction - np.pi / 2
-                x = (1 - np.tan(r)) * m[i - 1, j] + np.tan(r) * m[i - 1, j - 1]
-                y = (1 - np.tan(r)) * m[i + 1, j] + np.tan(r) * m[i + 1, j + 1]
+                x = (1 - np.tan(r)) * m[i + 1, j] + np.tan(r) * m[i + 1, j - 1]
+                y = (1 - np.tan(r)) * m[i - 1, j] + np.tan(r) * m[i - 1, j + 1]
                 is_max = m[i, j] >= x and m[i, j] >= y
 
             # if direction belongs to [135, 180)
             elif 3 * np.pi / 4 <= direction < np.pi:
                 r = np.pi - direction
-                x = (1 - np.tan(r)) * m[i, j - 1] + np.tan(r) * m[i - 1, j - 1]
-                y = (1 - np.tan(r)) * m[i, j + 1] + np.tan(r) * m[i + 1, j + 1]
+                x = (1 - np.tan(r)) * m[i, j - 1] + np.tan(r) * m[i + 1, j - 1]
+                y = (1 - np.tan(r)) * m[i, j + 1] + np.tan(r) * m[i - 1, j + 1]
                 is_max = m[i, j] >= x and m[i, j] >= y
 
             # if direction equals 180
