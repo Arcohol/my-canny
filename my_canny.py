@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from scipy.signal import convolve2d
+import sys
 
 
 def gaussian_blur(img):
@@ -26,7 +27,7 @@ def gaussian_blur(img):
     return out
 
 
-def sobel(img, l2gradient=False):
+def sobel(img, l2gradient=True):
     # Sobel operator in x direction
     sobel_x = np.array(
         [
@@ -103,7 +104,7 @@ def non_max_suppresion(m, d):
             # Set the pixel to 0 if it is not a maximum
             new_image[i, j] = m[i, j] * is_max
 
-    print("Pixels pruned by non-maximum suppression:", count)
+    print("non-maximum suppression:", count)
 
     return new_image
 
@@ -111,8 +112,10 @@ def non_max_suppresion(m, d):
 def non_max_suppresion_with_interpolation(m, d):
     """
     m: gradient magnitude, d: gradient direction
-    this function uses linear interpolation to check if the pixel is a local maximum
+    this function uses interpolation to check if the pixel is a local maximum
     in the direction of the gradient
+
+    Note: this can only improve the results a little bit
     """
     deg = np.copy(d)
     deg[deg < 0] += np.pi
@@ -171,22 +174,24 @@ def non_max_suppresion_with_interpolation(m, d):
 
             new_image[i, j] = m[i, j] * is_max
 
-    print("Pixels pruned by non-maximum suppression:", count)
+    print("non-maximum suppression with interpolation:", count)
 
     return new_image
 
 
 def double_threshold(m, low_threshold, high_threshold):
-    strong_edges = np.zeros_like(m)
-    weak_edges = np.zeros_like(m)
+    print("low_threshold:", low_threshold, "high_threshold:", high_threshold)
 
-    # Get the strong edges
-    strong_edges[m >= high_threshold] = 1
+    weak_edges = np.zeros_like(m)
+    strong_edges = np.zeros_like(m)
 
     # Get the weak edges
     weak_edges[np.logical_and(m >= low_threshold, m < high_threshold)] = 1
 
-    return strong_edges, weak_edges
+    # Get the strong edges
+    strong_edges[m >= high_threshold] = 1
+
+    return weak_edges, strong_edges
 
 
 def hysteresis(weak, strong):
@@ -212,18 +217,21 @@ def hysteresis(weak, strong):
     return strong
 
 
-def canny(image, low_threshold, high_threshold):
-    print("low_threshold:", low_threshold, "high_threshold:", high_threshold)
-
+def canny(image, low_threshold, high_threshold, interpolation=True):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blur = gaussian_blur(image)
-    m, d = sobel(blur)
-    m = non_max_suppresion_with_interpolation(m, d)
-    strong, weak = double_threshold(m, low_threshold, high_threshold)
-    strong = hysteresis(weak, strong)
+
+    m, d = sobel(gaussian_blur(image))
+
+    if interpolation:
+        m = non_max_suppresion_with_interpolation(m, d)
+    else:
+        m = non_max_suppresion(m, d)
+
+    weak, strong = double_threshold(m, low_threshold, high_threshold)
+    edge = hysteresis(weak, strong)
 
     # return as uint8
-    return strong.astype(np.uint8)
+    return edge.astype(np.uint8)
 
 
 if __name__ == "__main__":
@@ -231,7 +239,6 @@ if __name__ == "__main__":
     # 1. image path
     # 2. low threshold
     # 3. high threshold
-    import sys
 
     # read the image
     image = cv2.imread(sys.argv[1])
